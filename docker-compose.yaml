@@ -1,0 +1,86 @@
+version: "3"
+services:
+  zookeeper:
+    image: debezium/zookeeper:${DEBEZIUM_VERSION}
+    container_name: zookeeper
+    ports:
+      - 2181:2181
+      - 2888:2888
+      - 3888:3888
+  kafka:
+    image: debezium/kafka:${DEBEZIUM_VERSION}
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    links:
+      - zookeeper
+    environment:
+      # Environment variables that start with "KAFKA_" will be used to update the Kafka configuration file
+      KAFKA_ADVERTISED_HOST_NAME: ${HOST_IP}
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    hostname: kafka
+  postgres:
+    # building a local image for the postgres container so we can
+    # add our startup script to it
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: debezium/postgres:${DEBEZIUM_VERSION}
+    container_name: postgres
+    ports:
+      - 5433:5432
+    # An env_file, is a convenient way to pass many environment variables to a
+    # single command in one batch. This should not be confused with a .env file.
+    # However in this case we will also be using the .env file to pass the same vars
+    env_file:
+      - .env
+    healthcheck:
+      test: "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
+      interval: 2s
+      timeout: 20s
+      retries: 10
+    # Uncomment the following if you really want to keep your postgres data around
+    # on your disk. This will write to a local directory called 'db-data'
+    # volumes:
+    #   - ./db-data:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    entrypoint: >
+      /bin/sh -c "
+      cp -f /pgadmin4/pgpass /var/lib/pgadmin/;
+      chmod 600 /var/lib/pgadmin/pgpass;
+      chown pgadmin:pgadmin /var/lib/pgadmin/pgpass;
+      /entrypoint.sh
+      "
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    volumes:
+      - ./config/servers.json:/pgadmin4/servers.json # preconfigured servers/connections
+      - ./config/pgpass:/pgadmin4/pgpass # passwords for the connections in this file
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+  debezium:
+    image: debezium/connect:${DEBEZIUM_VERSION}
+    container_name: debezium
+    ports:
+      - 9090:8083
+    links:
+      - kafka
+    depends_on:
+      - kafka
+      - postgres
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=pg
+      - CONFIG_STORAGE_TOPIC=pg_connect_configs
+      - OFFSET_STORAGE_TOPIC=pg_connect_offsets
+      - STATUS_STORAGE_TOPIC=pg_connect_statuses
