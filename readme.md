@@ -106,35 +106,35 @@ $> `node ./src/index.js`
 
 This should show the sample data that was loaded in when we created our postgres container:
 
-```JSON
+```json
 {
-  before: null,
-  after: {
-    id: 1,
-    first_name: 'Fred',
-    last_name: 'Flintstone',
-    email: 'fred@gmail.com',
-    active: true,
-    created: '2022-05-28T15:53:15.655263Z',
-    updated: '2022-05-28T15:53:15.655263Z'
+  "before": null,
+  "after": {
+    "id": 1,
+    "first_name": "Fred",
+    "last_name": "Flintstone",
+    "email": "fred@gmail.com",
+    "active": true,
+    "created": "2022-05-28T15:53:15.655263Z",
+    "updated": "2022-05-28T15:53:15.655263Z"
   },
-  source: {
-    version: '1.9.2.Final',
-    connector: 'postgresql',
-    name: 'postgres',
-    ts_ms: 1653753215439,
-    snapshot: 'last',
-    db: 'postgres',
-    sequence: '[null,"36218608"]',
-    schema: 'public',
-    table: 'customer',
-    txId: 769,
-    lsn: 36218608,
-    xmin: null
+  "source": {
+    "version": "1.9.2.Final",
+    "connector": "postgresql",
+    "name": "postgres",
+    "ts_ms": 1653753215439,
+    "snapshot": "last",
+    "db": "postgres",
+    "sequence": "[null,\"36218608\"]",
+    "schema": "public",
+    "table": "customer",
+    "txId": 769,
+    "lsn": 36218608,
+    "xmin": null
   },
-  op: 'r',
-  ts_ms: 1653753215442,
-  transaction: null
+  "op": "r",
+  "ts_ms": 1653753215442,
+  "transaction": null
 }
 ```
 
