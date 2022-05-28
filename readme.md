@@ -152,3 +152,4 @@ enjoy!
 
 - [Thorough Introduction to Apache Kafka](https://hackernoon.com/thorough-introduction-to-apache-kafka-6fbf2989bbc1)
 - [Listen to Postgres Changes with Apache Kafka](https://medium.com/geekculture/listen-to-database-changes-with-apache-kafka-35440a3344f0)
+- [Distributed Systems Shibboleths](https://jolynch.github.io/posts/distsys_shibboleths/)
